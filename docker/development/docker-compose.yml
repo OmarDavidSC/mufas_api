@@ -1,0 +1,39 @@
+services:
+  web:
+    build:
+      context: ../..  # Ruta al directorio raíz del proyecto
+      dockerfile: docker/development/Dockerfile
+    container_name: php_devexamine_api_dev
+    ports:
+      - "8086:80"
+    volumes:
+      - ../../src:/var/www/html:cached  # Volumen para el código fuente
+      #- ../../var/www/html/vendor  # Volumen para Composer
+      #- ../../var/www/html/node_modules  # Volumen para Node.js
+    environment:
+      - NODE_ENV=development
+      - NODE_PATH=/var/www/html/node_modules
+      - CHOKIDAR_USEPOLLING=true
+    env_file:
+      - ../../.env
+    networks:
+      - shared_network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+
+networks:
+  shared_network:
+    external: true
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
+
+# step 01
+# docker-compose -f docker/development/docker-compose.yml up -d --build
+# step 02
+# docker exec -it php_devexamine_api_dev bash
+# step 03
+# composer install
+

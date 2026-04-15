@@ -1,0 +1,11 @@
+vendor/
+uploads/
+.env
+composer.lock
+public/uploads/profile-photos/*
+public/uploads/company-logos/*
+public/uploads/company-favicons/*
+public/upload/*
+node_modules
+package-lock.json
+logs/*

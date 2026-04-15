@@ -1,0 +1,16 @@
+<?php
+
+$map->attach('api.', '/api', function ($map) {
+    $map->attach('aws.', '/aws', function ($map) {
+        include __DIR__ . "/api/S3AwsRoute.php";
+    });
+
+    include __DIR__ . "/api/AuthRoute.php";
+    include __DIR__ . "/api/VimeoRoute.php";
+    include __DIR__ . "/api/CompanyRoute.php";
+    include __DIR__ . "/api/FileRoute.php";
+    include __DIR__ . "/api/UtiliesRoute.php";
+    include __DIR__ . "/api/MeetingRoute.php";
+    include __DIR__ . "/api/S3AwsRoute.php";
+    include __DIR__ . "/api/ProfileRoute.php";
+});
