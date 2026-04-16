@@ -77,6 +77,13 @@ class FG
         return $fecha;
     }
 
+    public static function getHour($format = "H:i:s")
+    {
+        date_default_timezone_set('America/Lima');
+        $fecha = date($format);
+        return $fecha;
+    }
+
     public static function getFormatDateTime($fecha, $format = 'Y-m-d H:i:s')
     {
         $date = Carbon::createFromFormat('Y-m-d H:i:s', $fecha);
@@ -199,26 +206,26 @@ class FG
             $mydebug = debug_backtrace();
             array_shift($mydebug);
             $debug = ($debug) ? $debug : $mydebug;
-    
+
             $folder = __DIR__ . "/../../logs/";
             $fullpath = "{$folder}debug.log";
-    
+
             // Crear el directorio si no existe
             if (!is_dir($folder)) {
                 mkdir($folder, 0777, true); // El tercer parámetro `true` permite crear subdirectorios
             }
-    
+
             // Verificar si el archivo existe antes de abrirlo
             if (!file_exists($fullpath)) {
                 $log = fopen($fullpath, "w"); // Usamos "w" en lugar de "c"
-                if ($log !== false) { 
-                    fclose($log); 
+                if ($log !== false) {
+                    fclose($log);
                 }
             }
-    
+
             // Asegurarse de que $debug[0] existe antes de usarlo
             $debug = isset($debug[0]) ? $debug[0] : [];
-    
+
             // Obtener la fecha
             $date = self::getDateHour();
             $fullmessage = "--- BEGIN " . $date . " ---\r\n";
@@ -228,10 +235,9 @@ class FG
             $fullmessage .= "FUNCTION: " . ($debug["function"] ?? 'N/A') . "\r\n";
             $fullmessage .= "MESSAGE: " . $msg . "\r\n";
             $fullmessage .= "--- END " . $date . " ---\r\n\r\n";
-    
+
             // Agregar al archivo sin necesidad de leerlo primero
             file_put_contents($fullpath, $fullmessage, FILE_APPEND | LOCK_EX);
-    
         } catch (Exception $e) {
             error_log("Error en recordErrorLog: " . $e->getMessage());
         }
@@ -302,17 +308,26 @@ class FG
         return "{$day} de {$month} a las {$time} {$meridiem}";
     }
 
-    public static function quickRandom($length = 16) {
+    public static function quickRandom($length = 16)
+    {
         $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
         return substr(str_shuffle(str_repeat($pool, 5)), 0, $length);
     }
 
-    public static function convertDatetimeIsoToDateHour($recordingStart) {
+    public static function convertDatetimeIsoToDateHour($recordingStart)
+    {
         // $recordingStart = "2025-01-07T20:21:20Z";
         date_default_timezone_set('America/Lima');
         $dateTime = new \DateTime($recordingStart);
         $dateTime->setTimezone(new \DateTimeZone('UTC')); // Asegura que la zona horaria es UTC
         return $dateTime->format('Y-m-d H:i:s');
+    }
+
+    public static function formatDateTimeHuman($datetime)
+    {
+        if (!$datetime) return null;
+
+        return Carbon::parse($datetime)->locale('es')->isoFormat('D [de] MMMM [del] YYYY [a las] h:mm A');
     }
 }

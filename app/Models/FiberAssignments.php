@@ -5,19 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Node extends Model
+class FiberAssignments extends Model
 {
     use SoftDeletes;
-    protected $table = 'nodes';
+    protected $table = 'fiber_assignments';
     protected $fillable = [
         'id',
-        'name',
-        'code',
-        'latitude',
-        'longitude',
-        'reference',
-        'district',
-        'city',
+        'fiber_id',
+        'client_id',
+        'assigned_at',
         'status',
     ];
 }

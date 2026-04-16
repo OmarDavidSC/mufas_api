@@ -13,4 +13,7 @@ $map->attach('api.', '/api', function ($map) {
     include __DIR__ . "/api/MeetingRoute.php";
     include __DIR__ . "/api/S3AwsRoute.php";
     include __DIR__ . "/api/ProfileRoute.php";
+
+    include __DIR__ . "/api/NodeRoute.php";
+    include __DIR__ . "/api/FiberRouter.php";
 });

@@ -5,19 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Node extends Model
+class Client extends Model
 {
     use SoftDeletes;
-    protected $table = 'nodes';
+    protected $table = 'clients';
     protected $fillable = [
         'id',
+        'dni',
         'name',
-        'code',
-        'latitude',
-        'longitude',
-        'reference',
+        'document_number',
+        'phone',
+        'address',
         'district',
         'city',
+        'latitude',
+        'longitude',
         'status',
     ];
 }
