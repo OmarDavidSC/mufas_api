@@ -71,19 +71,19 @@ class ClientDow
         try {
             $input = $request->getParsedBody();
 
-            $areas = Client::whereNull('deleted_at')
+            $items = Client::whereNull('deleted_at')
                 ->orderBy('name', 'asc')
                 ->get();
 
-            $areas = $areas->map(function ($item) {
+            $items = $items->map(function ($item) {
                 return [
                     'id' => $item->id,
-                    'fiber_number' => $item->fiber_number,
+                    'name' => $item->name,
                 ];
             });
 
             $response['success'] = true;
-            $response['data'] = $areas;
+            $response['data'] = $items;
             $response['message'] = 'adm';
         } catch (\Exception $e) {
             $response['message'] = $e->getMessage();
@@ -98,26 +98,44 @@ class ClientDow
             $input = $request->getParsedBody();
             $user_id = Application::getItem('user_id');
 
-            $node_id = trim($input['node_id']);
-            $fiber_number = trim($input['fiber_number']);
-            $color = trim($input['color']);
-       
+            $dni = trim($input['dni']);
+            $name = trim($input['name']);
+            $document_number = trim($input['document_number']);
+            $phone = trim($input['phone']);
+            $address = trim($input['address']);
+            $district = trim($input['district']);
+            $city = trim($input['city']);
+            $latitude = trim($input['latitude']);
+            $longitude = trim($input['longitude']);
 
-            if (empty($fiber_number) || empty($color) || empty($node_id)) {
+
+            if (empty($dni) || empty($name) || empty($document_number) || empty($phone) || empty($address) || empty($district) || empty($city) || empty($latitude) || empty($longitude)) {
                 $response['success'] = false;
                 $response['message'] = "Todos los campos son obligatorios";
                 return $response;
             }
 
-            $fiber = new Fiber();
-            $fiber->fiber_number = $fiber_number;
-            $fiber->color = $color;
-            $fiber->node_id = $node_id;
-            $fiber->save();
+            if (!$this->validateDniUnique($dni)) {
+                $response['success'] = false;
+                $response['message'] = "El DNI ya está registrado para otro cliente.";
+                return $response;
+            }
+
+            $client = new Client();
+            $client->dni = $dni;
+            $client->name = $name;
+            $client->document_number = $document_number;
+            $client->phone = $phone;
+            $client->address = $address;
+            $client->district = $district;
+            $client->city = $city;
+            $client->latitude = $latitude;
+            $client->longitude = $longitude;
+            $client->save();
 
             $response['success'] = true;
-            $response['data'] = $fiber;
-            $response['message'] = 'Hilo creado correctamente';
+            $response['data'] = $client;
+            $response['message'] = 'Cliente registrado correctamente';
         } catch (\Exception $e) {
             $response['message'] = $e->getMessage();
         }
@@ -130,29 +148,40 @@ class ClientDow
         try {
             $id = $request->getAttribute('id');
             $input = $request->getParsedBody();
-            $user_id = Application::getItem('user_id');
 
-            $fiber = Fiber::find($id);
-            if (!$fiber) {
+            $client = Client::find($id);
+            if (!$client) {
                 $response['success'] = false;
-                $response['message'] = "Hilo no encontrado.";
+                $response['message'] = "Cliente no encontrado.";
                 return $response;
             }
 
-            if (empty($input['fiber_number']) || empty($input['color']) ) {
+            if (empty($input['dni']) || empty($input['name']) || empty($input['document_number']) || empty($input['phone']) || empty($input['address']) || empty($input['district']) || empty($input['city']) || empty($input['latitude']) || empty($input['longitude'])) {
                 $response['success'] = false;
                 $response['message'] = "Todos los campos son obligatorios.";
                 return $response;
             }
 
-            $fiber->fiber_number = $input['fiber_number'];
-            $fiber->color = $input['color'];
-            $fiber->node_id = $input['node_id'];
-            $fiber->save();
+            if (!$this->validateDniUnique($input['dni'], $id)) {
+                $response['success'] = false;
+                $response['message'] = "El DNI ya está registrado para otro cliente.";
+                return $response;
+            }
+
+            $client->dni = $input['dni'];
+            $client->name = $input['name'];
+            $client->document_number = $input['document_number'];
+            $client->phone = $input['phone'];
+            $client->address = $input['address'];
+            $client->district = $input['district'];
+            $client->city = $input['city'];
+            $client->latitude = $input['latitude'];
+            $client->longitude = $input['longitude'];
+            $client->save();
 
             $response['success'] = true;
-            $response['data'] = $fiber;
-            $response['message'] = "Hilo actualizado correctamente";
+            $response['data'] = $client;
+            $response['message'] = "Cliente actualizado correctamente";
         } catch (\Exception $e) {
             $response['success'] = false;
             $response['message'] = $e->getMessage();
@@ -166,23 +195,33 @@ class ClientDow
         try {
             $id = $request->getAttribute('id');
 
-            $fiber = Fiber::find($id);
-            if (!$fiber) {
+            $client = Client::find($id);
+            if (!$client) {
                 $response['success'] = false;
-                $response['message'] = "Hilo no encontrado.";
+                $response['message'] = "Cliente no encontrado.";
                 return $response;
             }
 
-            $fiber->deleted_at = FG::getDateHour();
-            $fiber->save();
+            $client->deleted_at = FG::getDateHour();
+            $client->status = 'inactive';
+            $client->save();
 
             $response['success'] = true;
-            $response['data'] = $fiber;
-            $response['message'] = "Hilo fue eliminado correctamente";
+            $response['data'] = $client;
+            $response['message'] = "Cliente fue eliminado correctamente";
         } catch (\Exception $e) {
             $response['success'] = false;
             $response['message'] = $e->getMessage();
         }
         return $response;
+    }
+
+    private function validateDniUnique($dni, $excludeId = null)
+    {
+        $query = Client::where('dni', $dni)->whereNull('deleted_at');
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+        return !$query->exists();
     }
 }
