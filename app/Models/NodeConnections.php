@@ -16,4 +16,14 @@ class NodeConnections extends Model
         'distance_meters',
         'description',
     ];
+
+    public function origin()
+    {
+        return $this->belongsTo(Node::class, 'origin_node_id');
+    }
+
+    public function destination()
+    {
+        return $this->belongsTo(Node::class, 'destination_node_id');
+    }
 }
