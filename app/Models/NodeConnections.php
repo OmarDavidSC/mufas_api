@@ -14,6 +14,7 @@ class NodeConnections extends Model
         'origin_node_id',
         'destination_node_id',
         'distance_meters',
+        'distance_km',
         'description',
     ];
 

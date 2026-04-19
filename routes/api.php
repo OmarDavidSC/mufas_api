@@ -16,4 +16,6 @@ $map->attach('api.', '/api', function ($map) {
 
     include __DIR__ . "/api/NodeRoute.php";
     include __DIR__ . "/api/FiberRouter.php";
+    include __DIR__ . "/api/ClientRouter.php";
+    include __DIR__ . "/api/FiberAssignmentRouter.php";
 });
