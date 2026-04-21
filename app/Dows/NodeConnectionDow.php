@@ -191,7 +191,6 @@ class NodeConnectionDow
             }
 
             $connections = NodeConnections::all();
-
             //construir grafo
             $graph = [];
             foreach ($connections as $conn) {
@@ -204,7 +203,6 @@ class NodeConnectionDow
                     'distance' => $conn->distance_meters
                 ];
             }
-
             //dijkstra
             $distances = [];
             $previous = [];
@@ -217,9 +215,7 @@ class NodeConnectionDow
             }
 
             $distances[$start] = 0;
-
             while (!empty($queue)) {
-
                 // nodo con menor distancia
                 $minNode = null;
                 foreach ($queue as $node => $val) {
@@ -227,24 +223,17 @@ class NodeConnectionDow
                         $minNode = $node;
                     }
                 }
-
                 if ($minNode === null) break;
-
                 unset($queue[$minNode]);
-
                 if (!isset($graph[$minNode])) continue;
-
                 foreach ($graph[$minNode] as $neighbor) {
-
                     $alt = $distances[$minNode] + $neighbor['weight'];
-
                     if ($alt < $distances[$neighbor['node']]) {
                         $distances[$neighbor['node']] = $alt;
                         $previous[$neighbor['node']] = $minNode;
                     }
                 }
             }
-
             //reconstruir camino
             $path = [];
             $current = $end;
@@ -339,7 +328,6 @@ class NodeConnectionDow
                     'timestamp' => $metric ? date('Y-m-d H:i:s', strtotime($metric->timestamp)) : null,
                 ];
             });
-
             // $data = array_values($latestByNode);
             $response['success'] = true;
             $response['data'] = $data;
