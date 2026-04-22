@@ -100,7 +100,6 @@ class ClientDow
 
             $dni = trim($input['dni']);
             $name = trim($input['name']);
-            $document_number = trim($input['document_number']);
             $phone = trim($input['phone']);
             $address = trim($input['address']);
             $district = trim($input['district']);
@@ -109,7 +108,7 @@ class ClientDow
             $longitude = trim($input['longitude']);
 
 
-            if (empty($dni) || empty($name) || empty($document_number) || empty($phone) || empty($address) || empty($district) || empty($city) || empty($latitude) || empty($longitude)) {
+            if (empty($dni) || empty($name)  || empty($phone) || empty($address) || empty($district) || empty($city) || empty($latitude) || empty($longitude)) {
                 $response['success'] = false;
                 $response['message'] = "Todos los campos son obligatorios";
                 return $response;
@@ -124,7 +123,6 @@ class ClientDow
             $client = new Client();
             $client->dni = $dni;
             $client->name = $name;
-            $client->document_number = $document_number;
             $client->phone = $phone;
             $client->address = $address;
             $client->district = $district;
@@ -156,7 +154,7 @@ class ClientDow
                 return $response;
             }
 
-            if (empty($input['dni']) || empty($input['name']) || empty($input['document_number']) || empty($input['phone']) || empty($input['address']) || empty($input['district']) || empty($input['city']) || empty($input['latitude']) || empty($input['longitude'])) {
+            if (empty($input['dni']) || empty($input['name']) || empty($input['phone']) || empty($input['address']) || empty($input['district']) || empty($input['city']) || empty($input['latitude']) || empty($input['longitude'])) {
                 $response['success'] = false;
                 $response['message'] = "Todos los campos son obligatorios.";
                 return $response;
