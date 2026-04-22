@@ -11,7 +11,7 @@ class FiberAssignments extends Model
     protected $table = 'fiber_assignments';
     protected $fillable = [
         'id',
-        'fiber_id',
+        'splitter_port_id',
         'client_id',
         'assigned_at',
         'status',

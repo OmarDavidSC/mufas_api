@@ -34,9 +34,11 @@ class FiberDow
             $data = $items->map(function ($item) {
                 return [
                     'id' => $item->id,
-                    'fiber_number' => $item->fiber_number,
+                    'cable_number' => $item->cable_number,
                     'status' => $item->status,
                     'color' => $item->color,
+                    'total_fibers' => $item->total_fibers,
+                    'total_tubes' => $item->total_tubes,
                     'datecreated_label' => FG::formatDateTimeHuman($item->created_at),
                     'dateupdated_label' => FG::formatDateTimeHuman($item->updated_at),
                 ];
@@ -65,13 +67,13 @@ class FiberDow
             $input = $request->getParsedBody();
 
             $items = Fiber::whereNull('deleted_at')
-                ->orderBy('fiber_number', 'asc')
+                ->orderBy('cable_number', 'asc')
                 ->get();
 
             $items = $items->map(function ($item) {
                 return [
                     'id' => $item->id,
-                    'fiber_number' => $item->fiber_number,
+                    'cable_number' => $item->cable_number,
                 ];
             });
 
@@ -92,25 +94,29 @@ class FiberDow
             $user_id = Application::getItem('user_id');
 
             $node_id = trim($input['node_id']);
-            $fiber_number = trim($input['fiber_number']);
+            $cable_number = trim($input['cable_number']);
             $color = trim($input['color']);
+            $total_fibers = trim($input['total_fibers']);
+            $tube_type = trim($input['tube_type']); // multi  | single
 
 
-            if (empty($fiber_number) || empty($color) || empty($node_id)) {
+            if (empty($cable_number) || empty($color) || empty($node_id) || empty($total_fibers) || empty($tube_type)) {
                 $response['success'] = false;
                 $response['message'] = "Todos los campos son obligatorios";
                 return $response;
             }
 
             $fiber = new Fiber();
-            $fiber->fiber_number = $fiber_number;
+            $fiber->cable_number = $cable_number;
             $fiber->color = $color;
             $fiber->node_id = $node_id;
+            $fiber->total_fibers = $total_fibers;
+            $fiber->tube_type = $tube_type;
             $fiber->save();
 
             $response['success'] = true;
             $response['data'] = $fiber;
-            $response['message'] = 'Hilo creado correctamente';
+            $response['message'] = 'Fibra creado correctamente';
         } catch (\Exception $e) {
             $response['message'] = $e->getMessage();
         }
@@ -128,24 +134,26 @@ class FiberDow
             $fiber = Fiber::find($id);
             if (!$fiber) {
                 $response['success'] = false;
-                $response['message'] = "Hilo no encontrado.";
+                $response['message'] = "Fibra no encontrado.";
                 return $response;
             }
 
-            if (empty($input['fiber_number']) || empty($input['color'])) {
+            if (empty($input['cable_number']) || empty($input['color']) || empty($input['node_id']) || empty($input['total_fibers']) || empty($input['tube_type'])) {
                 $response['success'] = false;
                 $response['message'] = "Todos los campos son obligatorios.";
                 return $response;
             }
 
-            $fiber->fiber_number = $input['fiber_number'];
+            $fiber->cable_number = $input['cable_number'];
             $fiber->color = $input['color'];
             $fiber->node_id = $input['node_id'];
+            $fiber->total_fibers = $input['total_fibers'];
+            $fiber->tube_type = $input['tube_type'];
             $fiber->save();
 
             $response['success'] = true;
             $response['data'] = $fiber;
-            $response['message'] = "Hilo actualizado correctamente";
+            $response['message'] = "Fibra actualizada correctamente";
         } catch (\Exception $e) {
             $response['success'] = false;
             $response['message'] = $e->getMessage();
@@ -162,7 +170,7 @@ class FiberDow
             $fiber = Fiber::find($id);
             if (!$fiber) {
                 $response['success'] = false;
-                $response['message'] = "Hilo no encontrado.";
+                $response['message'] = "Fibra no encontrado.";
                 return $response;
             }
 
@@ -171,7 +179,7 @@ class FiberDow
 
             $response['success'] = true;
             $response['data'] = $fiber;
-            $response['message'] = "Hilo fue eliminado correctamente";
+            $response['message'] = "Fibra fue eliminado correctamente";
         } catch (\Exception $e) {
             $response['success'] = false;
             $response['message'] = $e->getMessage();

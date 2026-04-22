@@ -5,17 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Fiber extends Model
+class FiberSplice extends Model
 {
     use SoftDeletes;
-    protected $table = 'fibers';
+    protected $table = 'fiber_splices';
     protected $fillable = [
         'id',
-        'node_id',
-        'cable_number',
-        'color',
-        'total_fibers',
-        'tube_type',
+        'from_thread_id',
+        'to_thread_id',
+        'splice_type',
         'status',
     ];
 }

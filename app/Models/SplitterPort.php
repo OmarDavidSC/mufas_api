@@ -5,17 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Fiber extends Model
+class SplitterPort extends Model
 {
     use SoftDeletes;
-    protected $table = 'fibers';
+    protected $table = 'splitter_ports';
     protected $fillable = [
         'id',
-        'node_id',
-        'cable_number',
-        'color',
-        'total_fibers',
-        'tube_type',
+        'splitter_id',
+        'port_number',
+        'output_thread_id',
         'status',
     ];
 }
