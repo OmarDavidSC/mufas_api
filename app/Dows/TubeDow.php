@@ -3,6 +3,7 @@
 namespace App\Dows;
 
 use App\Middlewares\Application;
+use App\Models\FiberThread;
 use App\Models\Tube;
 use Illuminate\Database\Capsule\Manager as DB;
 use App\Utilities\FG;
@@ -88,6 +89,7 @@ class TubeDow
     public function store($request)
     {
         $response = FG::responseDefault();
+        DB::beginTransaction();
         try {
             $input = $request->getParsedBody();
             $user_id = Application::getItem('user_id');
@@ -95,11 +97,23 @@ class TubeDow
             $fiber_id = trim($input['fiber_id']);
             $tube_number = trim($input['tube_number']);
             $color = trim($input['color']);
+            $total_threads = isset($input['total_threads']) ? (int)$input['total_threads'] : 6;
 
 
             if (empty($fiber_id) || empty($tube_number) || empty($color)) {
                 $response['success'] = false;
                 $response['message'] = "Todos los campos son obligatorios";
+                return $response;
+            }
+
+            $exits = Tube::where('fiber_id', $fiber_id)
+                ->where('tuber_number', $tube_number)
+                ->whereNull('deleted_at')
+                ->first();
+
+            if ($exits) {
+                $response['success'] = false;
+                $response['message'] = "El número de tubo ya existe para esta fibra.";
                 return $response;
             }
 
@@ -109,10 +123,24 @@ class TubeDow
             $tube->color = $color;
             $tube->save();
 
+
+            $colors = ['azul', 'naranja', 'verde', 'marron', 'gris', 'blanco'];
+
+            for ($i = 1; $i <= $total_threads; $i++) {
+                $thread = new FiberThread();
+                $thread->tube_id = $tube->id;
+                $thread->thread_number = $i;
+                $thread->color = $colors[($i - 1) % count($colors)];
+                $thread->status = 'free';
+                $thread->save();
+            }
+
+            DB::commit();
             $response['success'] = true;
             $response['data'] = $tube;
             $response['message'] = 'Tubo creado correctamente';
         } catch (\Exception $e) {
+            DB::rollback();
             $response['message'] = $e->getMessage();
         }
         return $response;
@@ -121,10 +149,15 @@ class TubeDow
     public function update($request)
     {
         $response = FG::responseDefault();
+        DB::beginTransaction();
         try {
             $id = $request->getAttribute('id');
             $input = $request->getParsedBody();
             $user_id = Application::getItem('user_id');
+
+            $tube_number = trim($input['tube_number']);
+            $color = trim($input['color']);
+            $total_threads = isset($input['total_threads']) ? (int)$input['total_threads'] : 6;
 
             $tube = Tube::find($id);
             if (!$tube) {
@@ -133,20 +166,34 @@ class TubeDow
                 return $response;
             }
 
-            if (empty($input['tuber_number']) || empty($input['color'])) {
+            if (empty($tube_number) || empty($color)) {
                 $response['success'] = false;
                 $response['message'] = "Todos los campos son obligatorios.";
                 return $response;
             }
 
-            $tube->tuber_number = $input['tuber_number'];
-            $tube->color = $input['color'];
+            $exists = Tube::where('fiber_id', $tube->fiber_id)
+                ->where('tube_number', $tube_number)
+                ->where('id', '!=', $tube->id)
+                ->whereNull('deleted_at')
+                ->first();
+
+            if ($exists) {
+                throw new \Exception("Ya existe ese número de tubo en esta fibra");
+            }
+
+            $tube->tuber_number = $tube_number;
+            $tube->color = $color;
             $tube->save();
+
+            $this->syncThreads($tube->id, $total_threads);
+            DB::commit();
 
             $response['success'] = true;
             $response['data'] = $tube;
             $response['message'] = "Tubo actualizado correctamente";
         } catch (\Exception $e) {
+            DB::rollback();
             $response['success'] = false;
             $response['message'] = $e->getMessage();
         }
@@ -177,5 +224,45 @@ class TubeDow
             $response['message'] = $e->getMessage();
         }
         return $response;
+    }
+
+    private function syncThreads($tube_id, $total_threads)
+    {
+        $colors = ['azul', 'naranja', 'verde', 'marron', 'gris', 'blanco'];
+
+        $currentThreads = FiberThread::where('tube_id', $tube_id)
+            ->whereNull('deleted_at')
+            ->get();
+
+        $currentCount = $currentThreads->count();
+
+        //aumentar hilos
+        if ($total_threads > $currentCount) {
+            for ($i = $currentCount + 1; $i <= $total_threads; $i++) {
+                $thread = new FiberThread();
+                $thread->tube_id = $tube_id;
+                $thread->thread_number = $i;
+                $thread->color = $colors[($i - 1) % count($colors)];
+                $thread->status = 'free';
+                $thread->save();
+            }
+        }
+
+        //dismunuir hilos
+        if ($total_threads < $currentCount) {
+
+            $threadsToDelete = FiberThread::where('tube_id', $tube_id)
+                ->where('thread_number', '>', $total_threads)
+                ->whereNull('deleted_at')
+                ->get();
+
+            foreach ($threadsToDelete as $thread) {
+                if ($thread->status === 'occupied') {
+                    throw new \Exception("No puedes eliminar hilos ocupados");
+                }
+                $thread->deleted_at = FG::getDateHour();
+                $thread->save();
+            }
+        }
     }
 }

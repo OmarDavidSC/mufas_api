@@ -3,13 +3,11 @@
 namespace App\Dows;
 
 use App\Middlewares\Application;
-use App\Models\Fiber;
 use App\Models\FiberThread;
-use App\Models\Tube;
 use Illuminate\Database\Capsule\Manager as DB;
 use App\Utilities\FG;
 
-class FiberDow
+class TubeDow
 {
 
     public function index($request)
@@ -23,7 +21,7 @@ class FiberDow
             $page = isset($input['page']) ? (int)$input['page'] : 1;
             $perPage = 10;
 
-            $query = Fiber::whereNull('deleted_at')
+            $query = FiberThread::whereNull('deleted_at')
                 ->orderBy('id', 'desc');
 
             $total = $query->count();
@@ -36,11 +34,10 @@ class FiberDow
             $data = $items->map(function ($item) {
                 return [
                     'id' => $item->id,
-                    'cable_number' => $item->cable_number,
-                    'status' => $item->status,
+                    'tube_id' => $item->tube_id,
+                    'thread_number' => $item->thread_number,
                     'color' => $item->color,
-                    'total_fibers' => $item->total_fibers,
-                    'total_tubes' => $item->total_tubes,
+                    'status' => $item->status,
                     'datecreated_label' => FG::formatDateTimeHuman($item->created_at),
                     'dateupdated_label' => FG::formatDateTimeHuman($item->updated_at),
                 ];
@@ -68,14 +65,15 @@ class FiberDow
         try {
             $input = $request->getParsedBody();
 
-            $items = Fiber::whereNull('deleted_at')
-                ->orderBy('cable_number', 'asc')
+            $items = FiberThread::whereNull('deleted_at')
+                ->orderBy('thread_number', 'asc')
                 ->get();
 
             $items = $items->map(function ($item) {
                 return [
                     'id' => $item->id,
-                    'cable_number' => $item->cable_number,
+                    'thread_number' => $item->thread_number,
+                    'color' => $item->color
                 ];
             });
 
@@ -95,34 +93,26 @@ class FiberDow
             $input = $request->getParsedBody();
             $user_id = Application::getItem('user_id');
 
-            $node_id = trim($input['node_id']);
-            $cable_number = trim($input['cable_number']);
+            $tube_id = trim($input['tube_id']);
+            $thread_number = trim($input['thread_number']);
             $color = trim($input['color']);
-            $total_fibers = trim($input['total_fibers']);
-            $tube_type = trim($input['tube_type']); // multi  | single
 
 
-            if (empty($cable_number) || empty($color) || empty($node_id) || empty($total_fibers) || empty($tube_type)) {
+            if (empty($tube_id) || empty($thread_number) || empty($color)) {
                 $response['success'] = false;
                 $response['message'] = "Todos los campos son obligatorios";
                 return $response;
             }
 
-            $fiber = new Fiber();
-            $fiber->cable_number = $cable_number;
-            $fiber->color = $color;
-            $fiber->node_id = $node_id;
-            $fiber->total_fibers = $total_fibers;
-            $fiber->tube_type = $tube_type;
-            $fiber->save();
-
-            if ($tube_type === 'single') {
-                $this->createSingleTubeWithThreads($fiber, $total_fibers);
-            }
+            $thread = new FiberThread();
+            $thread->tube_id = $tube_id;
+            $thread->thread_number = $thread_number;
+            $thread->color = $color;
+            $thread->save();
 
             $response['success'] = true;
-            $response['data'] = $fiber;
-            $response['message'] = 'Fibra creado correctamente';
+            $response['data'] = $thread;
+            $response['message'] = 'Hilo creado correctamente';
         } catch (\Exception $e) {
             $response['message'] = $e->getMessage();
         }
@@ -137,34 +127,26 @@ class FiberDow
             $input = $request->getParsedBody();
             $user_id = Application::getItem('user_id');
 
-            $fiber = Fiber::find($id);
-            if (!$fiber) {
+            $thread = FiberThread::find($id);
+            if (!$thread) {
                 $response['success'] = false;
-                $response['message'] = "Fibra no encontrado.";
+                $response['message'] = "Hilo no encontrado.";
                 return $response;
             }
 
-            if (empty($input['cable_number']) || empty($input['color']) || empty($input['node_id']) || empty($input['total_fibers']) || empty($input['tube_type'])) {
+            if (empty($input['thread_number']) || empty($input['color'])) {
                 $response['success'] = false;
                 $response['message'] = "Todos los campos son obligatorios.";
                 return $response;
             }
 
-            if ($fiber->tube_type !== $input['tube_type']) {
-                $response['success'] = false;
-                $response['message'] = "No se puede cambiar el tipo de tubo una vez creado.";
-                return $response;
-            }
-
-            $fiber->cable_number = $input['cable_number'];
-            $fiber->color = $input['color'];
-            $fiber->node_id = $input['node_id'];
-            $fiber->total_fibers = $input['total_fibers'];
-            $fiber->save();
+            $thread->thread_number = $input['thread_number'];
+            $thread->color = $input['color'];
+            $thread->save();
 
             $response['success'] = true;
-            $response['data'] = $fiber;
-            $response['message'] = "Fibra actualizada correctamente";
+            $response['data'] = $thread;
+            $response['message'] = "Hilo actualizado correctamente";
         } catch (\Exception $e) {
             $response['success'] = false;
             $response['message'] = $e->getMessage();
@@ -178,70 +160,23 @@ class FiberDow
         try {
             $id = $request->getAttribute('id');
 
-            $fiber = Fiber::find($id);
-            if (!$fiber) {
+            $thread = FiberThread::find($id);
+            if (!$thread) {
                 $response['success'] = false;
-                $response['message'] = "Fibra no encontrado.";
+                $response['message'] = "Hilo no encontrado.";
                 return $response;
             }
 
-            $fiber->deleted_at = FG::getDateHour();
-            $fiber->save();
+            $thread->deleted_at = FG::getDateHour();
+            $thread->save();
 
             $response['success'] = true;
-            $response['data'] = $fiber;
-            $response['message'] = "Fibra fue eliminado correctamente";
+            $response['data'] = $thread;
+            $response['message'] = "Hilo fue eliminado correctamente";
         } catch (\Exception $e) {
             $response['success'] = false;
             $response['message'] = $e->getMessage();
         }
         return $response;
-    }
-
-    private function createSingleTubeWithThreads($fiber, $total_fibers)
-    {
-        //crear 1 tubo 
-        $tube = new Tube();
-        $tube->fiber_id = $fiber->id;
-        $tube->tuber_number = 1;
-        $tube->color = 'azul';
-        $tube->save();
-
-        //colores estandar (hasta 24)
-        $colors = [
-            'azul',
-            'naranja',
-            'verde',
-            'marron',
-            'gris',
-            'blanco',
-            'rojo',
-            'negro',
-            'amarillo',
-            'violeta',
-            'rosado',
-            'aqua',
-            'azul/negro',
-            'naranja/negro',
-            'verde/negro',
-            'marron/negro',
-            'gris/negro',
-            'blanco/negro',
-            'rojo/negro',
-            'negro/blanco',
-            'amarillo/negro',
-            'violeta/negro',
-            'rosado/negro',
-            'aqua/negro'
-        ];
-
-        for ($i = 0; $i < $total_fibers; $i++) {
-            $thread = new FiberThread();
-            $thread->tube_id = $tube->id;
-            $thread->thread_number = $i;
-            $thread->color = $colors[($i - 1) % count($colors)];
-            $thread->status = 'free';
-            $thread->save();
-        }
     }
 }
