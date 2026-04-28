@@ -7,7 +7,7 @@ use App\Models\FiberThread;
 use Illuminate\Database\Capsule\Manager as DB;
 use App\Utilities\FG;
 
-class TubeDow
+class FiberThreadDow
 {
 
     public function index($request)
