@@ -2,16 +2,16 @@
 
 namespace App\Controllers;
 
-use App\Dows\SplitterDow;
+use App\Dows\FiberSpliceDow;
 
-class SplitterController extends BaseController
+class FiberSpliceController extends BaseController
 {
 
     private $dow;
 
     public function __construct()
     {
-        $this->dow = new SplitterDow();
+        $this->dow = new FiberSpliceDow();
     }
 
     public function index($request)
@@ -19,14 +19,14 @@ class SplitterController extends BaseController
         return Response::json($this->dow->index($request));
     }
 
-    public function show($request)
-    {
-        return Response::json($this->dow->show($request));
-    }
-
     public function store($request)
     {
         return Response::json($this->dow->store($request));
+    }
+
+    public function show($request)
+    {
+        return Response::json($this->dow->show($request));
     }
 
     public function update($request)
@@ -39,8 +39,8 @@ class SplitterController extends BaseController
         return Response::json($this->dow->remove($request));
     }
 
-    public function ports($request)
+    public function bythread($request)
     {
-        return Response::json($this->dow->ports($request));
+        return Response::json($this->dow->bythread($request));
     }
 }

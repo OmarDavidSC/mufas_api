@@ -227,7 +227,7 @@ class NodeConnectionDow
                 unset($queue[$minNode]);
                 if (!isset($graph[$minNode])) continue;
                 foreach ($graph[$minNode] as $neighbor) {
-                    $alt = $distances[$minNode] + $neighbor['weight'];
+                    $alt = $distances[$minNode] + $neighbor['distance'];
                     if ($alt < $distances[$neighbor['node']]) {
                         $distances[$neighbor['node']] = $alt;
                         $previous[$neighbor['node']] = $minNode;

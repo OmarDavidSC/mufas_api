@@ -226,7 +226,7 @@ class FiberThreadDow
 
             $response['success'] = true;
             $response['data'] = $thread;
-            $response['message'] = 'Hilo actualizado correctamente';
+            $response['message'] = 'Hilo registrado correctamente';
         } catch (\Exception $e) {
             DB::rollback();
             $response['message'] = $e->getMessage();

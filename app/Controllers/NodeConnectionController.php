@@ -2,26 +2,21 @@
 
 namespace App\Controllers;
 
-use App\Dows\SplitterDow;
+use App\Dows\NodeConnectionDow;
 
-class SplitterController extends BaseController
+class NodeConnectionController extends BaseController
 {
 
     private $dow;
 
     public function __construct()
     {
-        $this->dow = new SplitterDow();
+        $this->dow = new NodeConnectionDow();
     }
 
     public function index($request)
     {
         return Response::json($this->dow->index($request));
-    }
-
-    public function show($request)
-    {
-        return Response::json($this->dow->show($request));
     }
 
     public function store($request)
@@ -39,8 +34,18 @@ class SplitterController extends BaseController
         return Response::json($this->dow->remove($request));
     }
 
-    public function ports($request)
+    public function nstatus($request)
     {
-        return Response::json($this->dow->ports($request));
+        return Response::json($this->dow->nstatus($request));
+    }
+
+    public function nhistory($request)
+    {
+        return Response::json($this->dow->nhistory($request));
+    }
+
+    public function nc3urrent($request)
+    {
+        return Response::json($this->dow->ncurrent($request));
     }
 }

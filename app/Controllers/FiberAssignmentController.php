@@ -24,9 +24,19 @@ class FiberAssignmentController extends BaseController
         return Response::json($this->dow->store($request));
     }
 
+    public function show($request)
+    {
+        return Response::json($this->dow->show($request));
+    }
+
     public function release($request)
     {
         return Response::json($this->dow->release($request));
+    }
+
+    public function client($request)
+    {
+        return Response::json($this->dow->client($request));
     }
 
     public function remove($request)
