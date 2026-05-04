@@ -35,6 +35,12 @@ class NodeDow
                 return [
                     'id' => $item->id,
                     'name' => $item->name,
+                    'code' => $item->code,
+                    'latitude' => $item->latitude,
+                    'longitude' => $item->longitude,
+                    'reference' => $item->reference,
+                    'district' => $item->district,
+                    'city' => $item->city,
                     'status' => $item->status,
                     'datecreated_label' => FG::formatDateTimeHuman($item->created_at),
                     'dateupdated_label' => FG::formatDateTimeHuman($item->updated_at),
@@ -142,7 +148,7 @@ class NodeDow
                 $response['success'] = false;
                 $response['message'] = "Todos los campos son obligatorios.";
                 return $response;
-            }
+            } 
 
             $node->name = $input['name'];
             $node->code = $input['code'];

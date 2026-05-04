@@ -21,7 +21,7 @@ class FiberAssignmentDow
 
             $input = $request->getParsedBody();
 
-            $page = isset($input['page']) ? (int)$input['page'] : 1;
+            $page = isset($input['page']) ? (int)$input['page'] : 1;    
             $perPage = 10;
 
             $query = FiberAssignments::from('fiber_assignments as fa')
